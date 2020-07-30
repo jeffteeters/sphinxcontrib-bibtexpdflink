@@ -1,0 +1,157 @@
+# -- Added for APA style
+# -- from: sphinxcontrib-bibtex/test/issue77
+
+from pybtex.style.formatting.unsrt import Style as UnsrtStyle
+from pybtex.style.labels.alpha import LabelStyle as AlphaLabelStyle
+from pybtex.style.sorting import author_year_title
+
+
+from pybtex.plugin import register_plugin
+import os
+from pybtex.style.template import (
+    href, field, optional, sentence, words
+)
+# extensions = ['sphinxcontrib.bibtex']
+# exclude_patterns = ['_build']
+
+
+class ApaLabelStyle(AlphaLabelStyle):
+    def format_label(self, entry):
+        # import pdb; pdb.set_trace()
+        # from: https://stackoverflow.com/questions/55942749/how-do-you-change-the-style-of-pybtex-references-in-sphinx
+        label = entry.key
+        return label
+
+# split file path into parts
+# from:
+# https://www.oreilly.com/library/view/python-cookbook/0596001673/ch04s16.html
+def splitall(path):
+    allparts = []
+    while 1:
+        parts = os.path.split(path)
+        if parts[0] == path:  # sentinel for absolute paths
+            allparts.insert(0, parts[0])
+            break
+        elif parts[1] == path: # sentinel for relative paths
+            allparts.insert(0, parts[1])
+            break
+        else:
+            path = parts[0]
+            allparts.insert(0, parts[1])
+    return allparts
+
+class FootApaStyle(UnsrtStyle):
+    def format_web_refs(self, e):
+        # based on urlbst output.web.refs
+        return sentence [
+            optional [ self.format_url(e) ],
+            optional [ self.format_eprint(e) ],
+            optional [ self.format_pubmed(e) ],
+            optional [ self.format_doi(e) ],
+            # following adds link to PDF
+            optional [ self.format_pdf(e) ],
+            optional [ self.format_rst(e) ],  # don't include rst link on footcite
+            ]
+
+    def format_pdf(self, entry):
+        # if entry.key == "JaeckelLA-1989a":
+        #     print("found JaeckelLA-1989a key")
+        # print("In format_pdf, html_static_path2=%s" % html_static_path2)
+        global saved_app
+        # base_path = "./source" # saved_app.srcdir
+        pdf_dir = saved_app.config.bibtexpdf_pdf_dir
+        srcdir = saved_app.srcdir
+        html_static_path = saved_app.config["html_static_path"]
+        # print("\npdf_dir is '%s'\nsrcdir='%s'\nhtml_static_path[0]='%s'" % (pdf_dir, srcdir, html_static_path[0]))
+        if pdf_dir is not None:
+            pdf_dir_path = os.path.join(srcdir, html_static_path[0], pdf_dir)
+            if not os.path.isdir(pdf_dir_path):
+                print("Directory for pdf files not found: %s" % pdf_dir_path)
+                sys.exit("aborting")
+            pdf_name = entry.key + ".pdf"
+            search_path = os.path.join(pdf_dir_path, pdf_name)
+            if os.path.isfile(search_path):
+                print("----------- Found %s" % pdf_name)
+                # now must generate relative path to download pdf
+                docname = saved_app.env.docname
+                print("docname='%s'" % docname)
+                path_parts = splitall(docname)
+                dir_prefix = "../" * (len(path_parts) - 1)
+                # import pdb; pdb.set_trace()
+                target_path = os.path.join(dir_prefix, html_static_path[0], pdf_dir, pdf_name)
+                return words [
+                    'pdf:',
+                    href [ target_path, pdf_name ]
+                ]
+        return words [""]
+
+    def format_rst(self, entry):
+        # create link to rst file if present
+        global saved_app
+        note_dir = saved_app.config.bibtexpdf_note_dir
+        if note_dir is not None:
+            srcdir = saved_app.srcdir
+            note_dir_path = os.path.join(srcdir, note_dir)
+            if not os.path.isdir(note_dir_path):
+                print("Directory for note files not found: %s" % note_dir_path)
+                sys.exit("aborting")
+            rst_name = entry.key + ".rst"
+            html_name = entry.key + ".html"
+            search_path = os.path.join(note_dir_path, rst_name)
+            if os.path.isfile(search_path):
+                print("----------- Found %s" % rst_name)
+                # check if this file is the note itself
+                docname = saved_app.env.docname
+                print("search_path='%s', docname='%s'" % (search_path, docname))
+                if search_path.endswith(docname + ".rst"):
+                    # this file is the note itself
+                    return words ["Notes:", html_name]
+                # not note, must generate relative path to download pdf
+                path_parts = splitall(docname)
+                dir_prefix = "../" * (len(path_parts) - 1)
+                html_name = entry.key + ".html"
+                target_path = os.path.join(dir_prefix, note_dir, html_name)
+                return words [
+                    'Notes:',
+                    href [ target_path, html_name ]
+                ]
+        return words [""]
+
+
+class ApaStyle(FootApaStyle):
+    default_label_style = 'apa'
+    default_sorting_style = 'author_year_title'
+
+    def format_web_refs(self, e):
+        # based on urlbst output.web.refs
+        return sentence [
+            optional [ self.format_url(e) ],
+            optional [ self.format_eprint(e) ],
+            optional [ self.format_pubmed(e) ],
+            optional [ self.format_doi(e) ],
+            # following added for pseudo cerebellum
+            optional [ self.format_pdf(e) ],
+            optional [ self.format_rst(e) ],   # include information about note page
+            ]
+
+
+register_plugin('pybtex.style.labels', 'apa', ApaLabelStyle)
+register_plugin('pybtex.style.formatting', 'apastyle', ApaStyle)
+register_plugin('pybtex.style.formatting', 'footapastyle', FootApaStyle)
+# register_plugin('pybtex.style.sorting','apastyle', ApaStyle)
+register_plugin('pybtex.style.sorting','apastyle', author_year_title)
+
+
+saved_app = None
+def setup(app):
+    app.add_config_value('bibtexpdf_note_dir', None, 'html')
+    app.add_config_value('bibtexpdf_pdf_dir', None, 'html')
+
+    # save app so can get config value and source directory for building links to PDF files
+    global saved_app
+    saved_app = app
+    return {
+        'version': '0.1',
+        'parallel_read_safe': True,
+        'parallel_write_safe': True,
+    }
