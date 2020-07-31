@@ -9,7 +9,7 @@ from pybtex.style.sorting import author_year_title
 from pybtex.plugin import register_plugin
 import os
 from pybtex.style.template import (
-    href, field, optional, sentence, words
+    href, optional, sentence, words
 )
 # extensions = ['sphinxcontrib.bibtex']
 # exclude_patterns = ['_build']
@@ -59,11 +59,11 @@ class FootApaStyle(UnsrtStyle):
         # print("In format_pdf, html_static_path2=%s" % html_static_path2)
         global saved_app
         # base_path = "./source" # saved_app.srcdir
-        pdf_dir = saved_app.config.bibtexpdf_pdf_dir
-        srcdir = saved_app.srcdir
-        html_static_path = saved_app.config["html_static_path"]
+        pdf_dir = saved_app.config.bibtexpdflink_pdf_dir
         # print("\npdf_dir is '%s'\nsrcdir='%s'\nhtml_static_path[0]='%s'" % (pdf_dir, srcdir, html_static_path[0]))
         if pdf_dir is not None:
+            srcdir = saved_app.srcdir
+            html_static_path = saved_app.config["html_static_path"]
             pdf_dir_path = os.path.join(srcdir, html_static_path[0], pdf_dir)
             if not os.path.isdir(pdf_dir_path):
                 print("Directory for pdf files not found: %s" % pdf_dir_path)
@@ -80,7 +80,7 @@ class FootApaStyle(UnsrtStyle):
                 # import pdb; pdb.set_trace()
                 target_path = os.path.join(dir_prefix, html_static_path[0], pdf_dir, pdf_name)
                 return words [
-                    'pdf:',
+                    'PDF:',
                     href [ target_path, pdf_name ]
                 ]
         return words [""]
@@ -88,7 +88,7 @@ class FootApaStyle(UnsrtStyle):
     def format_rst(self, entry):
         # create link to rst file if present
         global saved_app
-        note_dir = saved_app.config.bibtexpdf_note_dir
+        note_dir = saved_app.config.bibtexpdflink_note_dir
         if note_dir is not None:
             srcdir = saved_app.srcdir
             note_dir_path = os.path.join(srcdir, note_dir)
@@ -105,7 +105,7 @@ class FootApaStyle(UnsrtStyle):
                 print("search_path='%s', docname='%s'" % (search_path, docname))
                 if search_path.endswith(docname + ".rst"):
                     # this file is the note itself
-                    return words ["Notes:", html_name]
+                    return words ["Notes:", html_name + " (this file)."]
                 # not note, must generate relative path to download pdf
                 path_parts = splitall(docname)
                 dir_prefix = "../" * (len(path_parts) - 1)
@@ -144,8 +144,8 @@ register_plugin('pybtex.style.sorting','apastyle', author_year_title)
 
 saved_app = None
 def setup(app):
-    app.add_config_value('bibtexpdf_note_dir', None, 'html')
-    app.add_config_value('bibtexpdf_pdf_dir', None, 'html')
+    app.add_config_value('bibtexpdflink_note_dir', None, 'html')
+    app.add_config_value('bibtexpdflink_pdf_dir', None, 'html')
 
     # save app so can get config value and source directory for building links to PDF files
     global saved_app

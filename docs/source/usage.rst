@@ -1,6 +1,8 @@
 Usage
 =====
 
+Name the PDF files and notes files as described in :ref:`installation`.
+
 
 Use the normal bibtex or bibtex2 directives:
 
