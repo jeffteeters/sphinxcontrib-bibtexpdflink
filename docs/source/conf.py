@@ -28,8 +28,8 @@ author = 'Jeff Teeters'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinxcontrib.bibtexpdflink',
-'sphinxcontrib.bibtex',
-'sphinxcontrib.bibtex2',
+  'sphinxcontrib.bibtex',
+  'sphinxcontrib.bibtex2',
 ]
 bibtex_bibfiles = ['references/refs.bib']
 bibtex_style = 'footapastyle'
