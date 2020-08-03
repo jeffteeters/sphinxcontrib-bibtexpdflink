@@ -13,7 +13,7 @@ setup(
     license="MIT",
     description="Sphinx extension to add links to PDF and note files to BiBTeX style citations",
     long_description=long_desc,
-    install_requires=["Sphinx>=2.0", "sphinxcontrib-bibtex"],
+    install_requires=["Sphinx>=2.0", "sphinxcontrib-bibtex", "sphinxcontrib-bibtex2"],
     # zip_safe=False,
     packages=find_packages(),
     namespace_packages=["sphinxcontrib"],
