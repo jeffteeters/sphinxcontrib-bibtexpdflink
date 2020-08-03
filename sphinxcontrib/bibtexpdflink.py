@@ -54,13 +54,8 @@ class FootApaStyle(UnsrtStyle):
             ]
 
     def format_pdf(self, entry):
-        # if entry.key == "JaeckelLA-1989a":
-        #     print("found JaeckelLA-1989a key")
-        # print("In format_pdf, html_static_path2=%s" % html_static_path2)
         global saved_app
-        # base_path = "./source" # saved_app.srcdir
         pdf_dir = saved_app.config.bibtexpdflink_pdf_dir
-        # print("\npdf_dir is '%s'\nsrcdir='%s'\nhtml_static_path[0]='%s'" % (pdf_dir, srcdir, html_static_path[0]))
         if pdf_dir is not None:
             srcdir = saved_app.srcdir
             html_static_path = saved_app.config["html_static_path"]
@@ -71,13 +66,10 @@ class FootApaStyle(UnsrtStyle):
             pdf_name = entry.key + ".pdf"
             search_path = os.path.join(pdf_dir_path, pdf_name)
             if os.path.isfile(search_path):
-                print("----------- Found %s" % pdf_name)
                 # now must generate relative path to download pdf
                 docname = saved_app.env.docname
-                print("docname='%s'" % docname)
                 path_parts = splitall(docname)
                 dir_prefix = "../" * (len(path_parts) - 1)
-                # import pdb; pdb.set_trace()
                 target_path = os.path.join(dir_prefix, html_static_path[0], pdf_dir, pdf_name)
                 return words [
                     'PDF:',
@@ -99,10 +91,8 @@ class FootApaStyle(UnsrtStyle):
             html_name = entry.key + ".html"
             search_path = os.path.join(note_dir_path, rst_name)
             if os.path.isfile(search_path):
-                print("----------- Found %s" % rst_name)
                 # check if this file is the note itself
                 docname = saved_app.env.docname
-                print("search_path='%s', docname='%s'" % (search_path, docname))
                 if search_path.endswith(docname + ".rst"):
                     # this file is the note itself
                     return words ["Notes:", html_name + " (this file)."]
