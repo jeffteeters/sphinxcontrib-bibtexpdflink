@@ -48,9 +48,9 @@ class FootApaStyle(UnsrtStyle):
             optional [ self.format_eprint(e) ],
             optional [ self.format_pubmed(e) ],
             optional [ self.format_doi(e) ],
-            # following adds link to PDF
+            # adds link to PDF and to note
             optional [ self.format_pdf(e) ],
-            optional [ self.format_rst(e) ],  # don't include rst link on footcite
+            optional [ self.format_rst(e) ],
             ]
 
     def format_pdf(self, entry):
@@ -112,17 +112,6 @@ class ApaStyle(FootApaStyle):
     default_label_style = 'apa'
     default_sorting_style = 'author_year_title'
 
-    def format_web_refs(self, e):
-        # based on urlbst output.web.refs
-        return sentence [
-            optional [ self.format_url(e) ],
-            optional [ self.format_eprint(e) ],
-            optional [ self.format_pubmed(e) ],
-            optional [ self.format_doi(e) ],
-            # following added for pseudo cerebellum
-            optional [ self.format_pdf(e) ],
-            optional [ self.format_rst(e) ],   # include information about note page
-            ]
 
 
 register_plugin('pybtex.style.labels', 'apa', ApaLabelStyle)
