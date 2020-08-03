@@ -59,5 +59,10 @@ and
 Then the pdf files must be placed in directory: ``_static/papers``.
 
 
+
+The directory specified for *bibtexpdflink_note_dir* must be directly inside the top-level Sphinx source directory
+(the same directory containing the Sphinx ``conf.py`` file).
+
+
 The names of the pdf and notes files must be the same as the bibtex citation key, but respectively 
 with extension ".pdf" and ".rst". 

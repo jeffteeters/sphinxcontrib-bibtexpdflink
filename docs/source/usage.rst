@@ -25,4 +25,24 @@ Some random text...
 .. footbibliography::
 
 
+Generating a list of the notes
+------------------------------
+
+
+To generate a list of notes files, put an additional ".rst" file in the directory containing
+the notes (the name of the file could be "notes.rst").
+Include in the file a ``toctree::`` directive like in the following:
+
+.. code-block:: rst
+
+   The following notes are available:
+   
+   .. toctree::
+      :glob:
+   
+      *
+
+
+This will be rendered as shown on the :ref:`notes` page.
+
 
