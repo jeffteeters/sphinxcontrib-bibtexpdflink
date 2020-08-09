@@ -8,11 +8,63 @@ from pybtex.style.sorting import author_year_title
 
 from pybtex.plugin import register_plugin
 import os
+import sys
 from pybtex.style.template import (
     href, optional, sentence, words
 )
+
+
+from sphinx.util import logging
+logger = logging.getLogger(__name__)
+
+
 # extensions = ['sphinxcontrib.bibtex']
 # exclude_patterns = ['_build']
+
+
+class Bibtexpdflink_paths:
+    # class for storing directory paths for PDF files and notes files
+    ci = None   # class instance
+    def __init__(self, app):
+        pdf_dir = app.config.bibtexpdflink_pdf_dir
+        if pdf_dir is not None:
+            srcdir = app.srcdir
+            html_static_path = app.config["html_static_path"]
+            pdf_dir_path = os.path.join(srcdir, html_static_path[0], pdf_dir)
+            if not os.path.isdir(pdf_dir_path):
+                logger.error("bibtexpdflink_pdf_dir set to '%s', but directory for pdf files not found:\n%s\nAborting" % 
+                    (pdf_dir, pdf_dir_path))
+                sys.exit()
+            self.pdf_dir = pdf_dir
+        else:
+            logger.warning("'bibtexpdflink_pdf_dir' not specified in config.py.  Links to PDFs will NOT be made.")
+            self.pdf_dir = None
+        note_dir = app.config.bibtexpdflink_note_dir
+        if note_dir is not None:
+            srcdir = app.srcdir
+            note_dir_path = os.path.join(srcdir, note_dir)
+            if not os.path.isdir(note_dir_path):
+                logger.error("bibtexpdflink_note_dir set to '%s', but directory for note files not found:\n%s\nAborting" %
+                    (note_dir, note_dir_path))
+                sys.exit()
+            self.note_dir = note_dir
+        else:
+            logger.warning("'bibtexpdflink_note_dir' not specified in config.py.  Links to note files will NOT be made.")
+            self.note_dir = None
+
+    def get_dirs():
+        global saved_app
+        # create instance of class if does not exist
+        if Bibtexpdflink_paths.ci is None:
+            Bibtexpdflink_paths.ci = Bibtexpdflink_paths(saved_app)
+        return Bibtexpdflink_paths.ci
+
+    def get_pdf_dir():
+        return Bibtexpdflink_paths.get_dirs().pdf_dir
+
+    def get_note_dir():
+        return Bibtexpdflink_paths.get_dirs().note_dir
+
 
 
 class ApaLabelStyle(AlphaLabelStyle):
@@ -54,6 +106,29 @@ class FootApaStyle(UnsrtStyle):
             ]
 
     def format_pdf(self, entry):
+        global saved_app
+        # pdf_dir = saved_app.config.bibtexpdflink_pdf_dir
+        pdf_dir = Bibtexpdflink_paths.get_pdf_dir()
+        if pdf_dir is not None:
+            srcdir = saved_app.srcdir
+            html_static_path = saved_app.config["html_static_path"]
+            pdf_dir_path = os.path.join(srcdir, html_static_path[0], pdf_dir)
+            assert os.path.isdir(pdf_dir_path), "Directory for pdf files not found: %s\nAborting." % pdf_dir_path
+            pdf_name = entry.key + ".pdf"
+            search_path = os.path.join(pdf_dir_path, pdf_name)
+            if os.path.isfile(search_path):
+                # now must generate relative path to download pdf
+                docname = saved_app.env.docname
+                path_parts = splitall(docname)
+                dir_prefix = "../" * (len(path_parts) - 1)
+                target_path = os.path.join(dir_prefix, html_static_path[0], pdf_dir, pdf_name)
+                return words [
+                    'PDF:',
+                    href [ target_path, pdf_name ]
+                ]
+        return words [""]
+
+    def format_pdf_old(self, entry):
         global saved_app
         pdf_dir = saved_app.config.bibtexpdflink_pdf_dir
         if pdf_dir is not None:
@@ -125,7 +200,6 @@ saved_app = None
 def setup(app):
     app.add_config_value('bibtexpdflink_note_dir', None, 'html')
     app.add_config_value('bibtexpdflink_pdf_dir', None, 'html')
-
     # save app so can get config value and source directory for building links to PDF files
     global saved_app
     saved_app = app
