@@ -1,3 +1,9 @@
+# Sphinx documentation
+dist/
+build/
+docs/build/
+**/.DS_Store
+**/#*#
 *~
-\#*#
-docs/build
+sphinxcontrib_bibtexpdflink.egg-info/
+

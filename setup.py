@@ -7,7 +7,7 @@ with open("README.rst") as f:
 
 setup(
     name="sphinxcontrib-bibtexpdflink",
-    version="0.1.3",
+    version="0.1.4",
     author="Jeff Teeters",
     author_email="jeff@teeters.us",
     license="MIT",
