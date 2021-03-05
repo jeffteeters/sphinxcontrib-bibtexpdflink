@@ -7,13 +7,13 @@ with open("README.rst") as f:
 
 setup(
     name="sphinxcontrib-bibtexpdflink",
-    version="0.1.4",
+    version="0.1.5",
     author="Jeff Teeters",
     author_email="jeff@teeters.us",
     license="MIT",
     description="Sphinx extension to add links to PDF and note files to BiBTeX style citations",
     long_description=long_desc,
-    install_requires=["Sphinx>=2.0", "sphinxcontrib-bibtex", ],
+    install_requires=["Sphinx>=2.0", "sphinxcontrib-bibtex", "oset"],
     # zip_safe=False,
     packages=find_packages(),
     namespace_packages=["sphinxcontrib"],
