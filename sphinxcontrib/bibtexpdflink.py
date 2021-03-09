@@ -117,15 +117,24 @@ class FootApaStyle(UnsrtStyle):
             pdf_name = entry.key + ".pdf"
             search_path = os.path.join(pdf_dir_path, pdf_name)
             if os.path.isfile(search_path):
+                print("found pdf: %s" % search_path)
                 # now must generate relative path to download pdf
-                docname = saved_app.env.docname
-                path_parts = splitall(docname)
-                dir_prefix = "../" * (len(path_parts) - 1)
+                try:
+                    docname = saved_app.env.docname
+                except KeyError:
+                    print("Unable to retrieve docname for pdf")
+                    # import pdb; pdb.set_trace()
+                    dir_prefix = "../"
+                else:
+                    print("docname for pdf = %s" % docname)
+                    path_parts = splitall(docname)
+                    dir_prefix = "../" * (len(path_parts) - 1)
                 target_path = os.path.join(dir_prefix, html_static_path[0], pdf_dir, pdf_name)
                 return words [
                     'PDF:',
                     href [ target_path, pdf_name ]
                 ]
+            print("unable to find pdf: %s" % search_path)
         return words [""]
 
     def format_pdf_old(self, entry):
@@ -167,19 +176,28 @@ class FootApaStyle(UnsrtStyle):
             search_path = os.path.join(note_dir_path, rst_name)
             if os.path.isfile(search_path):
                 # check if this file is the note itself
-                docname = saved_app.env.docname
-                if search_path.endswith(docname + ".rst"):
-                    # this file is the note itself
-                    return words ["Notes:", html_name + " (this file)."]
-                # not note, must generate relative path to download pdf
-                path_parts = splitall(docname)
-                dir_prefix = "../" * (len(path_parts) - 1)
+                print("found note: %s" % search_path)
+                try:
+                    docname = saved_app.env.docname
+                except KeyError:
+                    print("Unable to retrieve docname for note")
+                    dir_prefix = "../"
+                else:
+                    print("docname for note=%s" % docname)
+                    docname = saved_app.env.docname
+                    if search_path.endswith(docname + ".rst"):
+                        # this file is the note itself
+                        return words ["Notes:", html_name + " (this file)."]
+                    # not note, must generate relative path to download pdf
+                    path_parts = splitall(docname)
+                    dir_prefix = "../" * (len(path_parts) - 1)
                 html_name = entry.key + ".html"
                 target_path = os.path.join(dir_prefix, note_dir, html_name)
                 return words [
                     'Notes:',
                     href [ target_path, html_name ]
                 ]
+            print("unable to find note: %s" % search_path)
         return words [""]
 
 
